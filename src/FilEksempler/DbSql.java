@@ -9,6 +9,7 @@ import java.util.Scanner;
 public class DbSql {
     private Connection connection;
     private Statement stmt;
+    private Statement stmt1;
 
     DbSql(){
         connection = null;
@@ -29,6 +30,19 @@ public class DbSql {
               Statement stmt=connection.createStatement();
               stmt.execute(sql);
               System.out.println("Connection to SQLite has been established.");
+              stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    void indsaetfagstud(int stdnr,int fagnr){
+        try {
+            String sql = "INSERT INTO studfag (stdnr,fagnr) VALUES(" +stdnr+","+fagnr+")";
+            Statement stmt=connection.createStatement();
+            stmt.execute(sql);
+            System.out.println("Connection to SQLite has been established.");
+            stmt.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -41,6 +55,7 @@ public class DbSql {
             Statement stmt=connection.createStatement();
             stmt.execute(sql);
             System.out.println("Connection to SQLite has been established.");
+            stmt.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -52,20 +67,202 @@ public class DbSql {
               Statement stmt=connection.createStatement();
               stmt.execute(sql);
               System.out.println("Connection to SQLite has been established.");
+              stmt.close();
          } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public void updateStudKlasse(Studerende s,String nyKlasse) {
+    public void updateStudKlasse(int stdnr,String nyKlasse) {
         try {
-              String sql = "UPDATE studerende SET klasse ='"+nyKlasse+ "' WHERE stdnr="+String.valueOf(s.getStdnr());
+              String sql = "UPDATE studerende SET klasse ='"+nyKlasse+ "' WHERE stdnr="+stdnr;
               Statement stmt=connection.createStatement();
               stmt.execute(sql);
               System.out.println("Connection to SQLite has been established.");
+              stmt.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+
+
+        public  Studerende soegStnnr(int stdnr){
+          Studerende s=new Studerende();
+          String sql = "SELECT * from studerende where stdnr="+String.valueOf(stdnr);
+          try{
+            connection.setAutoCommit(true);
+            Statement stmt=connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.next()) {
+                s.setStdnr(rs.getInt(1));
+                s.setFnavn(rs.getString(2));
+                s.setEnavn(rs.getString(3));
+                s.setAdresse(rs.getString(4));
+                s.setPostnr(rs.getString(5));
+                s.setMobil(rs.getString(6));
+                s.setKlasse(rs.getString(7));
+            }
+            else
+                s=null;
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return s;
+    }
+
+
+
+    public  Studerende soegAltStdnr(int stdnr){
+        Studerende s=new Studerende();
+        String sql = "SELECT * from studerende left join studfag on studerende.stdnr=studfag.stdnr left join fag on studfag.fagnr=fag.fagnr where studerende.stdnr="+String.valueOf(stdnr);
+        try{
+            Statement stmt=connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            Statement stmt1=connection.createStatement();
+            ResultSet rs1 = stmt.executeQuery(sql);
+            int fagnr;
+            String fagnavn;
+            while(rs.next()) {
+                s.setStdnr(rs.getInt("stdnr"));
+                s.setFnavn(rs.getString("fnavn"));
+                s.setEnavn(rs.getString("enavn"));
+                s.setAdresse(rs.getString("adresse"));
+                s.setPostnr(rs.getString("postnr"));
+                s.setMobil(rs.getString("mobil"));
+                s.setKlasse(rs.getString("klasse"));
+                String sql1="SELECT * from studfag left join fag on studfag.fagnr=fag.fagnr where studfag.stdnr="+stdnr;
+                rs1 = stmt1.executeQuery(sql1);
+                while(rs1.next()){
+                    Fag f = new Fag();
+                    f.setFagnr(rs1.getInt("fagnr"));
+                    f.setFagnavn(rs1.getString("fagnavn"));
+                    s.fagliste.add(f);
+                }
+            }
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+        return s;
+    }
+
+
+
+    public ArrayList<Studerende> soegefternavn(String enavn){
+        ArrayList<Studerende> tabel=new ArrayList<Studerende>();
+        String sql = "SELECT * from studerende where enavn='"+enavn+"'";
+        try{
+            Statement stmt=connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            Studerende s=new Studerende();
+            while(rs.next()) {
+                s.setStdnr(rs.getInt("stdnr"));
+                s.setFnavn(rs.getString("fnavn"));
+                tabel.add(s);
+            }
+            stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return tabel;
+    }
+
+
+    public ArrayList<Studerende> alleoplysninger(){
+        ArrayList<Studerende> tabel=new ArrayList<Studerende>();
+       // String sql = "SELECT * from studerende left join studfag on studerende.stdnr=studfag.stdnr left join fag on studfag.fagnr=fag.fagnr order by stdnr";
+          String sql="select * from studerende";
+        try{
+            Statement stmt=connection.createStatement();
+            Statement stmt1=connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while(rs.next()) {
+                Studerende s=new Studerende();
+                int nr=rs.getInt("stdnr");
+                s.setStdnr(nr);
+                s.setFnavn(rs.getString("fnavn"));
+                s.setEnavn(rs.getString("enavn"));
+                s.setAdresse(rs.getString("adresse"));
+                s.setPostnr(rs.getString("postnr"));
+                s.setMobil(rs.getString("mobil"));
+                s.setKlasse(rs.getString("klasse"));
+                String sql1="SELECT * from studfag left join fag on studfag.fagnr=fag.fagnr where studfag.stdnr="+nr;
+                ResultSet rs1 = stmt1.executeQuery(sql1);
+                while(rs1.next()){
+                    Fag f = new Fag();
+                    f.setFagnr(rs1.getInt("fagnr"));
+                    f.setFagnavn(rs1.getString("fagnavn"));
+                    s.fagliste.add(f);
+                }
+                tabel.add(s);
+            }
+            stmt.close();
+            stmt1.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return tabel;
+    }
+
+
+
+    public ArrayList<Studerende> allestud(){
+        ArrayList<Studerende> tabel=new ArrayList<Studerende>();
+        String sql = "SELECT * from studerende";
+        try{
+            Statement stmt=connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            int i=0;
+            while(rs.next()) {
+                Studerende s=new Studerende();
+                s.setStdnr(rs.getInt("stdnr"));
+                s.setFnavn(rs.getString("fnavn"));
+                s.setEnavn(rs.getString("enavn"));
+                s.setAdresse(rs.getString("adresse"));
+                s.setPostnr(rs.getString("postnr"));
+                s.setMobil(rs.getString("mobil"));
+                s.setKlasse(rs.getString("klasse"));
+                tabel.add(s);
+                i++;
+            }
+            stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return tabel;
+    }
+
+
+    public ArrayList<Studerende> allestudmedfag(int fagnr){
+        ArrayList<Studerende> tabel=new ArrayList<Studerende>();
+        String sql = "SELECT * from studerende inner join studfag on studerende.stdnr=studfag.stdnr where studfag.fagnr="+fagnr;
+        try{
+            Statement stmt=connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+           while(rs.next()) {
+                Studerende s=new Studerende();
+                s.setStdnr(rs.getInt("stdnr"));
+                s.setFnavn(rs.getString("fnavn"));
+                s.setEnavn(rs.getString("enavn"));
+                s.setAdresse(rs.getString("adresse"));
+                s.setPostnr(rs.getString("postnr"));
+                s.setMobil(rs.getString("mobil"));
+                s.setKlasse(rs.getString("klasse"));
+                tabel.add(s);
+            }
+            stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return tabel;
     }
 
 
@@ -76,6 +273,20 @@ public class DbSql {
                     + "	fagnr integer PRIMARY KEY,\n"
                     + "	fagnavn TEXT NOT NULL \n"
                     + ");";
+            Statement stmt = connection.createStatement();
+            stmt.execute(sql);
+            System.out.println("Connection to SQLite has been established.");
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+    }
+
+    public void tilfojfeltstudfag(){
+        try {
+            String sql = "alter table studfag add kar integer";
             Statement stmt = connection.createStatement();
             stmt.execute(sql);
             System.out.println("Connection to SQLite has been established.");
@@ -131,179 +342,6 @@ public class DbSql {
 
     }
 
-
-        public  Studerende soegStnnr(int stdnr){
-          Studerende s=new Studerende();
-          String sql = "SELECT * from studerende where stdnr="+String.valueOf(stdnr);
-          try{
-            connection.setAutoCommit(true);
-            Statement stmt=connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            if(rs.next()) {
-                s.setStdnr(rs.getInt(1));
-                s.setFnavn(rs.getString(2));
-                s.setEnavn(rs.getString(3));
-                s.setAdresse(rs.getString(4));
-                s.setPostnr(rs.getString(5));
-                s.setMobil(rs.getString(6));
-                s.setKlasse(rs.getString(7));
-            }
-            else
-                s=null;
-
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return s;
-    }
-
-
-
-    public  Studerende soegAltStdnr(int stdnr){
-        Studerende s=new Studerende();
-        s=null;
-        String sql = "SELECT * from studerende inner join studfag on studerende.stdnr=studfag.stdnr inner join fag on studfag.fagnr=fag.fagnr where stdnr="+String.valueOf(stdnr);
-        try{
-            Statement stmt=connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            ArrayList<Fag> liste=new ArrayList<Fag>();
-            int fagnr;
-            String fagnavn;
-            while(rs.next()) {
-                s.setStdnr(rs.getInt(1));
-                s.setFnavn(rs.getString(2));
-                s.setEnavn(rs.getString(3));
-                s.setAdresse(rs.getString(4));
-                s.setPostnr(rs.getString(5));
-                s.setMobil(rs.getString(6));
-                s.setKlasse(rs.getString(7));
-                fagnr= rs.getInt("fagnr");
-                fagnavn=rs.getString("fagnavn");
-                Fag f=new Fag(fagnr,fagnavn);
-                //liste.add(f);
-                s.fagliste.add(f);
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        return s;
-    }
-
-
-
-    public ArrayList<Studerende> soegefternavn(String enavn){
-        ArrayList<Studerende> tabel=new ArrayList<Studerende>();
-        String sql = "SELECT * from studerende where enavn='"+enavn+"'";
-        try{
-            Statement stmt=connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            Studerende s=new Studerende();
-            while(rs.next()) {
-                s.setStdnr(rs.getInt("stdnr"));
-                s.setFnavn(rs.getString("fnavn"));
-                tabel.add(s);
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return tabel;
-    }
-
-
-    public ArrayList<StudFag> alleoplysninger(){
-        ArrayList<StudFag> tabel=new ArrayList<StudFag>();
-        String sql = "SELECT * from studerende inner join studfag on studerende.stdnr=studfag.stdnr inner join fag on studfag.fagnr=fag.fagnr ";
-        try{
-            Statement stmt=connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-
-            int i=0;
-            while(rs.next()) {
-                StudFag sf=new StudFag();
-                sf.getS().setStdnr(rs.getInt("stdnr"));
-                sf.getS().setFnavn(rs.getString("fnavn"));
-                sf.getS().setEnavn(rs.getString("enavn"));
-                sf.getS().setAdresse(rs.getString("adresse"));
-                sf.getS().setPostnr(rs.getString("postnr"));
-                sf.getS().setMobil(rs.getString("mobil"));
-                sf.getS().setKlasse(rs.getString("klasse"));
-                sf.getF().setFagnr(rs.getInt("fagnr"));
-                sf.getF().setFagnavn(rs.getString("fagnavn"));
-                tabel.add(sf);
-                i++;
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return tabel;
-    }
-
-
-
-    public ArrayList<Studerende> allestud(){
-        ArrayList<Studerende> tabel=new ArrayList<Studerende>();
-        String sql = "SELECT * from studerende";
-        try{
-            Statement stmt=connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-
-            int i=0;
-            while(rs.next()) {
-                Studerende s=new Studerende();
-                s.setStdnr(rs.getInt("stdnr"));
-                s.setFnavn(rs.getString("fnavn"));
-                s.setEnavn(rs.getString("enavn"));
-                s.setAdresse(rs.getString("adresse"));
-                s.setPostnr(rs.getString("postnr"));
-                s.setMobil(rs.getString("mobil"));
-                s.setKlasse(rs.getString("klasse"));
-                tabel.add(s);
-                i++;
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return tabel;
-    }
-
-
-    public  void indsaetStudListe(StudContainer sc) {
-
-        try {
-            for(int i=0;i<sc.henttabel().size();i++) {
-                String sql = "INSERT INTO studerende (stdnr,fnavn,enavn,adresse,postnr,mobil,klasse) VALUES(" +
-                        String.valueOf(sc.henttabel().get(i).getStdnr()) + ",'" + sc.henttabel().get(i).getFnavn()
-                        + "','" + sc.henttabel().get(i).getEnavn() + "','";
-                sql = sql + sc.henttabel().get(i).getAdresse() + "','" +
-                        sc.henttabel().get(i).getPostnr() + "','" + sc.henttabel().get(i).getMobil() + "','"
-                        + sc.henttabel().get(i).getKlasse() + "')";
-                Statement stmt = connection.createStatement();
-                stmt.execute(sql);
-            }
-            System.out.println("Connection to SQLite has been established.");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-
-
-    public  void indsaetStudFagListe(StudFagContainer sfc) {
-
-        try {
-            for(int i=0;i<sfc.henttabel().size();i++) {
-                String sql = "INSERT INTO studfag (stdnr,fagnr)VALUES(" +
-                   String.valueOf(sfc.henttabel().get(i).getStdnr()) +"," + sfc.henttabel().get(i).getFagnr()+");";
-                Statement stmt = connection.createStatement();
-                stmt.execute(sql);
-            }
-            System.out.println("Connection to SQLite has been established.");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
 
 
 }

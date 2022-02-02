@@ -27,4 +27,12 @@ public class Fag {
     public void setFagnavn(String fagnavn) {
         this.fagnavn = fagnavn;
     }
+
+    @Override
+    public String toString() {
+        return "Fag{" +
+                "fagnr=" + fagnr +
+                ", fagnavn='" + fagnavn + '\'' +
+                '}';
+    }
 }

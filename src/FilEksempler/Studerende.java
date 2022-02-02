@@ -17,6 +17,19 @@ public class Studerende {
 
     }
 
+   /* @Override
+    public String toString() {
+        return "Studerende{" +
+                "stdnr=" + stdnr +
+                ", fnavn='" + fnavn + '\'' +
+                ", enavn='" + enavn + '\'' +
+                ", adresse='" + adresse + '\'' +
+                ", postnr='" + postnr + '\'' +
+                ", mobil='" + mobil + '\'' +
+                ", klasse='" + klasse + '\'' +
+                '}';
+    }*/
+
     @Override
     public String toString() {
         return "Studerende{" +
@@ -27,6 +40,7 @@ public class Studerende {
                 ", postnr='" + postnr + '\'' +
                 ", mobil='" + mobil + '\'' +
                 ", klasse='" + klasse + '\'' +
+                ", fagliste=" + fagliste +
                 '}';
     }
 
@@ -95,5 +109,14 @@ public class Studerende {
     public void setKlasse(String klasse) {
         this.klasse = klasse;
     }
+
+    public ArrayList<Fag> getFagliste() {
+        return fagliste;
+    }
+
+    public void setFagliste(ArrayList<Fag> fagliste) {
+        this.fagliste = fagliste;
+    }
+
 
 }

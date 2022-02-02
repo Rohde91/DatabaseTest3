@@ -2,85 +2,82 @@ package FilEksempler;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Main {
 
+    public static Studerende inputstuddata(){
+        Scanner in=new Scanner(System.in);
+        Studerende s=new Studerende();
+        System.out.println("Indtast stdnr, fnavn, enavn, adresse, postnr, mobil, klasse");
+        s.setStdnr(in.nextInt());
+        s.setFnavn(in.next());
+        s.setEnavn(in.next());
+        s.setAdresse(in.next());
+        s.setPostnr(in.next());
+        s.setMobil(in.next());
+        s.setKlasse(in.next());
+        return s;
+    }
+
+
+    public static void menu(){
+        int valg=1;
+        Scanner input=new Scanner(System.in);
+        DbSql db=new DbSql();
+        ArrayList<Studerende> tabel=new ArrayList<Studerende>();
+        while(valg!=0) {
+            System.out.println("1. Opret ny studerende");
+            System.out.println("2. Opret nyt fag ");
+            System.out.println("3. Tildel studerende nyt fag ");
+            System.out.println("4. Udskriv stamdata em en studerende ");
+            System.out.println("5. Udskriv alle oplysninger om alle studerende ");
+            System.out.println("6. Udskriv alle oplysninger om en studerende ");
+            System.out.println("7. Søg alle der har et givet fag ");
+            System.out.println("8. Opdater studerendes klasse ");
+            System.out.println("9. Slet studerende ");
+            System.out.println("0. Stop programmet");
+            System.out.print("Indtast valg:  ");
+            valg=input.nextInt();
+            switch(valg){
+                case 1: Studerende s;
+                        s=inputstuddata();
+                        db.indsaetStud(s);
+                        break;
+                case 3: System.out.println("Indtast stdnr og fagnr");
+                        db.indsaetfagstud(input.nextInt(),input.nextInt());
+                        break;
+                case 4: System.out.println("Indtast stdnr");
+                        s=db.soegStnnr(input.nextInt());
+                        System.out.println(s.toString());
+                        break;
+                case 5: tabel.clear();
+                        tabel=db.alleoplysninger();
+                        for(int i=0;i<tabel.size();i++) {
+                            System.out.format("%s \n",tabel.get(i).toString());
+                        }
+                        break;
+                case 6: System.out.println("Indtast stdnr");
+                        s=db.soegAltStdnr(input.nextInt());
+                        System.out.println(s.toString());
+                        break;
+                case 7: System.out.println("Indtast fagnr");
+                        tabel.clear();
+                        tabel=db.allestudmedfag(input.nextInt());
+                        for(int i=0;i<tabel.size();i++) {
+                           System.out.format("%s \n",tabel.get(i).toString());
+                        }
+                        break;
+                case 8: System.out.println("Indtast stdnr og den nye klasse");
+                        db.updateStudKlasse(input.nextInt(),input.next());
+                        break;
+           }
+        }
+
+    }
+
     public static void main(String[] args) {
-        // write your code here
-        DbSql db = new DbSql();
-        //db.opretTabelStud();
-        Studerende s = new Studerende(1, "Anne", "Andersen", "Annevej 5", "2000", "12121212", "1a");
-        // db.indsaetStud(s);
-        Studerende s1 = new Studerende(2, "Bent", "Jensen", "Bentvej 7", "2000", "12345678", "1b");
-        // db.indsaetStud(s1);
-
-     /*  StudContainer sc= new StudContainer();
-       try {
-           sc.laesTxtFil();
-       } catch (FileNotFoundException exception) {
-           exception.printStackTrace();
-       }
-
-       OutputSkaerm os=new OutputSkaerm();
-
-       os.udskrivStudListe(sc);*/
-
-        //db.indsaetStudListe(sc);
-
-
-        // db.opretTabelfag();
-        Fag f = new Fag(1, "Matematik");
-        //db.indsaetFag(f);
-        //f.setFagnr(5);
-        // f.setFagnavn("Systemudvikling");
-        // db.indsaetFag(f);
-        //db.opretTabelStudFag();
-
-
-      /*  StudFagContainer sfc=new StudFagContainer();
-        try {
-            sfc.laesTxtFil();
-        } catch (FileNotFoundException exception) {
-            exception.printStackTrace();
-        }*/
-        //  sfc.udskrivSkaerm();
-        //   db.indsaetStudFagListe(sfc);
-
-       /* s=db.soegStnnr(3);
-        os.udskrivStud(s);*/
-
-
-       /* ArrayList<Studerende> tabel;
-        tabel = db.soegefternavn("Hansen");
-
-        OutputSkaerm os=new OutputSkaerm();
-        for (int i = 0; i < tabel.size(); i++) {
-            s=tabel.get(i);
-            os.udskrivStud(s);
-
-        }*/
-       /* OutputSkaerm os = new OutputSkaerm();
-        ArrayList<Studerende> tabelalle;
-        tabelalle = db.allestud();
-
-        for (int i = 0; i < tabelalle.size(); i++) {
-            s = tabelalle.get(i);
-            os.udskrivStud(s);
-        }
-        Studerende s2=new Studerende();
-        s2=db.soegStnnr(5);
-        System.out.println(s2.toString());  */
-
-        ArrayList<StudFag> tabel2;
-        tabel2=db.alleoplysninger();
-        for(int i=0;i<tabel2.size();i++){
-            int nr=tabel2.get(i).getS().getStdnr();
-            String fnavn=(tabel2.get(i).getS().getFnavn());
-            int fagnr=(tabel2.get(i).getF().getFagnr());
-            String fagnavn=(tabel2.get(i).getF().getFagnavn());
-            System.out.format(("%s %d %s\n"),fnavn,fagnr,fagnavn);
-        }
-
+        menu();
 
     }
 }
